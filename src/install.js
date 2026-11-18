@@ -101,10 +101,7 @@ function looksLikeMcp(f) {
   }
 }
 
-// ---------- 启动方式：优先 npx，因为它跟着版本走且到处都有 ----------
-
-const FROM_NPM = ROOT.includes(`${path.sep}node_modules${path.sep}`);
-const REPO = 'https://github.com/alchaincyf/huashu-chrome';
+// 本地定制版始终指向当前仓库，避免安装到上游 npm 包。
 
 // process.execPath 常常是 /opt/homebrew/Cellar/node/26.0.0/bin/node 或
 // ~/.nvm/versions/node/v22.1.0/bin/node 这种带版本号的真实路径——node 一升级它就消失，
@@ -120,7 +117,6 @@ function nodeBin() {
 }
 
 function launcher(client) {
-  if (FROM_NPM) return { command: WIN ? 'npx.cmd' : 'npx', args: ['-y', 'huashu-chrome', 'mcp', '--client', client] };
   return { command: nodeBin(), args: [path.join(ROOT, 'src', 'cli.js'), 'mcp', '--client', client] };
 }
 
@@ -131,7 +127,7 @@ function launcher(client) {
 // 「绝不静默改配置」靠的是先备份再写、每一处都打印出来，不是靠让人跑两遍。
 // 想只看不写，用 --dry-run。
 export async function install({ yes = true, only = null } = {}) {
-  console.log('\nhuashu-chrome 安装\n');
+  console.log('\nichrome 安装\n');
 
   const all = knownAgents().filter((a) => a.file);
   const discovered = discover(new Set(all.map((a) => a.file)));
@@ -150,9 +146,10 @@ export async function install({ yes = true, only = null } = {}) {
     console.log('  已知的会自动配置：' + SPEC.agents.map((a) => a.name).join('、'));
     console.log('  没列出来的 agent 也会被自动发现，只要它把 MCP 配置写在 ~/.<名字>/ 下。\n');
     console.log('  都不匹配的话，把下面这段填进它的 MCP 配置：\n');
-    console.log('    ' + JSON.stringify({ mcpServers: { 'huashu-chrome': launcher('custom') } }, null, 2).split('\n').join('\n    '));
+    console.log('    ' + JSON.stringify({ mcpServers: { 'ichrome': launcher('custom') } }, null, 2).split('\n').join('\n    '));
     console.log('');
     printExtensionStep();
+    if (!yes) return;
     const g = writeGuide();
     console.log(`  引导页：${g}`);
     openInBrowser(g);
@@ -173,6 +170,7 @@ export async function install({ yes = true, only = null } = {}) {
 
   if (!plan.length) {
     console.log('\n所有检测到的 agent 都已经配好了。');
+    if (!yes) { printExtensionStep(); return; }
   } else {
     console.log(`\n将修改 ${plan.length} 个配置文件，每个都会先备份成 <文件名>.bak-<时间戳>。`);
     if (!yes) {
@@ -202,23 +200,27 @@ export async function install({ yes = true, only = null } = {}) {
   const guide = writeGuide(rows);
   console.log(`  引导页已生成并尝试打开：${guide}`);
   openInBrowser(guide);
-  console.log('\n装完扩展后跑 `huashu-chrome doctor` 验证。');
+  console.log('\n装完扩展后在项目目录跑 `npm run doctor` 验证。');
   // 现在多数用户是让 agent 代装的，从不路过仓库页。这一行是写给读 stdout 的 agent 的：
   // 请它转达、由人决定——绝不让 agent 替用户点，那是刷 star。
-  console.log(`\n装好了。如果它帮到你，问一下用户愿不愿意给仓库点个 star：${REPO}\n`);
 }
 
 function printExtensionStep() {
   console.log('\n还差一步：装 Chrome 扩展');
-  console.log(`  商店一键安装：${STORE_URL}`);
-  console.log('  （浏览器不允许脚本代装扩展，这一下必须你自己点；引导页里有图）');
+  console.log(`  打开 chrome://extensions → 开发者模式 → 加载已解压的扩展程序，选择 ${path.join(ROOT, 'extension')}`);
+  console.log('  iChrome 是本地定制版，尚未上架 Chrome 应用商店。');
 }
 
 // ---------- 配置读写 ----------
 
-function alreadyConfigured(t) {
+export function alreadyConfigured(t) {
   try {
-    return fs.readFileSync(t.file, 'utf8').includes('huashu-chrome');
+    const raw = fs.readFileSync(t.file, 'utf8');
+    if (t.kind === 'toml') {
+      return /^\s*\[\s*mcp_servers\s*\.\s*(?:ichrome|"ichrome"|'ichrome')\s*\]\s*(?:#.*)?$/m.test(raw);
+    }
+    const cfg = JSON.parse(raw);
+    return Object.hasOwn(cfg.mcpServers || {}, 'ichrome');
   } catch {
     return false;
   }
@@ -233,7 +235,7 @@ function writeJson(t) {
     throw new Error(`这个文件不是合法 JSON（${e.message}），不敢动它`);
   }
   cfg.mcpServers = cfg.mcpServers || {};
-  cfg.mcpServers['huashu-chrome'] = launcher(t.client);
+  cfg.mcpServers['ichrome'] = launcher(t.client);
   fs.writeFileSync(t.file, JSON.stringify(cfg, null, 2) + '\n');
 }
 
@@ -243,8 +245,8 @@ function writeToml(t) {
   const l = launcher(t.client);
   const block = [
     '',
-    '# --- huashu-chrome (由 huashu-chrome install 添加) ---',
-    '[mcp_servers.huashu-chrome]',
+    '# --- ichrome (由 ichrome install 添加) ---',
+    '[mcp_servers.ichrome]',
     `command = ${JSON.stringify(l.command)}`,
     `args = [${l.args.map((a) => JSON.stringify(a)).join(', ')}]`,
     '',
@@ -272,10 +274,9 @@ export function extensionId() {
 // 这一页给的是「agent 替他跑完 install 之后弹出来的那个人」看的：主路径是商店
 // 一键安装，开发者手动加载收在附录里。页面里**不放任何本机绝对路径**——
 // 手动加载那步让用户回终端跑 `extension --reveal`，文件夹自己在访达里选中。
-const STORE_URL = 'https://chromewebstore.google.com/detail/foiljmaplphdfimfcnfdpekhdnfbgfbf';
 
 function writeGuide(rows = []) {
-  const dir = path.join(os.tmpdir(), 'huashu-chrome');
+  const dir = path.join(os.tmpdir(), 'ichrome');
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, 'install.html');
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -299,12 +300,12 @@ function writeGuide(rows = []) {
   const html = fs.readFileSync(path.join(ROOT, 'src', 'guide.html'), 'utf8')
     .replaceAll('{{ICON}}', icon)
     .replaceAll('{{VERSION}}', esc(version))
+    .replaceAll('{{EXT_PATH}}', esc(path.join(ROOT, 'extension')))
     .replaceAll('{{EXT_ID}}', esc(extensionId() || '（本地构建，无固定 ID）'))
     .replaceAll('{{SITE_COUNT}}', sites ? String(sites) : '二十多')
     .replaceAll('{{AGENT_COUNT}}', `${ok} / ${rows.length}`)
     .replaceAll('{{AGENT_ROWS}}', agentRows)
-    .replaceAll('{{AGENT_FOOT}}', esc(foot))
-    .replaceAll('https://chromewebstore.google.com/detail/foiljmaplphdfimfcnfdpekhdnfbgfbf', STORE_URL);
+    .replaceAll('{{AGENT_FOOT}}', esc(foot));
   fs.writeFileSync(file, html);
   return file;
 }

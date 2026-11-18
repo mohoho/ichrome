@@ -4,14 +4,14 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-export const HOME = path.join(os.homedir(), '.huashu-chrome');
+export const HOME = path.join(os.homedir(), '.ichrome');
 export const BRIDGE_FILE = path.join(HOME, 'bridge.json');
 export const LOCK_FILE = path.join(HOME, 'bridge.lock');
 export const AUDIT_FILE = path.join(HOME, 'audit.jsonl');
 export const ALLOWLIST_FILE = path.join(HOME, 'allowlist.json');
 export const LOG_FILE = path.join(HOME, 'bridge.log');
 
-export const DEFAULT_PORT = 8899;
+export const DEFAULT_PORT = 18999;
 
 export function ensureHome() {
   fs.mkdirSync(HOME, { recursive: true, mode: 0o700 });
@@ -57,13 +57,13 @@ export function audit(entry) {
 // ---------- 桥只认自己的扩展（#14）----------
 //
 // 浏览器替扩展发的 Origin 是 chrome-extension://<id>，不可伪造；但以前桥对任何扩展 id 都放行，
-// 用户装的随便哪个扩展都能冒充 huashu-chrome 连进来接命令。现在只放行：
-//   1. 商店版的 id（商店分配，和 manifest 的 key 推出来的不是同一个）
+// 用户装的随便哪个扩展都能冒充 ichrome 连进来接命令。现在只放行：
+//   1. 本地定制版尚未上架商店，STORE_EXTENSION_ID 留空
 //   2. manifest key 推出来的 id——「加载已解压的扩展程序」那条官方手动安装路径
 //   3. 用户显式加的：环境变量 HUASHU_CHROME_TRUSTED_EXTENSION_IDS（逗号分隔），
-//      或 ~/.huashu-chrome/trusted-extensions.json 里的 {"ids": [...]}。默认都没有。
+//      或 ~/.ichrome/trusted-extensions.json 里的 {"ids": [...]}。默认都没有。
 // 改过 key 的 fork、删了 key 的本地构建，走第 3 条。
-export const STORE_EXTENSION_ID = 'foiljmaplphdfimfcnfdpekhdnfbgfbf';
+export const STORE_EXTENSION_ID = null;
 export const TRUSTED_EXTENSIONS_FILE = path.join(HOME, 'trusted-extensions.json');
 const EXT_ID_RE = /^[a-p]{32}$/;
 
@@ -81,7 +81,7 @@ export function manifestExtensionId() {
 
 // 每次有扩展来连时现读：改了配置不用重启桥
 export function trustedExtensionIds() {
-  const ids = new Set([STORE_EXTENSION_ID]);
+  const ids = new Set(STORE_EXTENSION_ID ? [STORE_EXTENSION_ID] : []);
   const fromManifest = manifestExtensionId();
   if (fromManifest) ids.add(fromManifest);
   for (const id of (process.env.HUASHU_CHROME_TRUSTED_EXTENSION_IDS || '').split(',')) {

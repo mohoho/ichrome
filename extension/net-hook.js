@@ -3,17 +3,17 @@
 // 必须赶在页面自己的 JS 之前跑，否则首屏那批 XHR 全漏掉，
 // 而恰恰是首屏那批带着列表数据。
 //
-// 只往 window.__hcNet 里堆记录，不上报、不外发。读取由扩展按需拉。
+// 只往 window.__ichromeNet 里堆记录，不上报、不外发。读取由扩展按需拉。
 (() => {
-  if (window.__hcNet) return;
-  window.__hcNet = [];
+  if (window.__ichromeNet) return;
+  window.__ichromeNet = [];
 
   const MAX_ENTRIES = 300;
   const MAX_BODY = 400000;
 
   const push = (r) => {
-    window.__hcNet.push(r);
-    if (window.__hcNet.length > MAX_ENTRIES) window.__hcNet.shift();
+    window.__ichromeNet.push(r);
+    if (window.__ichromeNet.length > MAX_ENTRIES) window.__ichromeNet.shift();
   };
 
   const origFetch = window.fetch;

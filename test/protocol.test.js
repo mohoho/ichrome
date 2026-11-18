@@ -57,7 +57,7 @@ test('伪造成 chrome-extension 的网页 Origin：浏览器不可能发出，�
 
 // #14：默认配置的桥只认商店版和 manifest key 推出的扩展 id，别的扩展冒充不进来
 test('默认配置只放行自己的扩展 id', async () => {
-  const { STORE_EXTENSION_ID, manifestExtensionId } = await import('../src/lib/paths.js');
+  const { manifestExtensionId } = await import('../src/lib/paths.js');
   const port = 8996;
   const strict = startBridge({ port, token: TOKEN, writeInfo: false });
   await strict.ready;
@@ -67,8 +67,8 @@ test('默认配置只放行自己的扩展 id', async () => {
     return firstMessage(ws).finally(() => ws.close());
   };
   try {
-    assert.equal((await hello(`chrome-extension://${STORE_EXTENSION_ID}`)).type, 'welcome');
     assert.equal((await hello(`chrome-extension://${manifestExtensionId()}`)).type, 'welcome');
+    await assert.rejects(hello('chrome-extension://foiljmaplphdfimfcnfdpekhdnfbgfbf'), (e) => /403/.test(e.message));
     await assert.rejects(hello('chrome-extension://abcdefghijklmnopabcdefghijklmnop'), (e) => /403/.test(e.message));
     await assert.rejects(hello('https://evil.example.com'), (e) => /403/.test(e.message));
     // 显式放行：环境变量现读，不用重启桥

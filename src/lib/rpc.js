@@ -79,7 +79,7 @@ export class BridgeClient {
       if (!spawned) spawned = tryStartBridge();
       await sleep(250);
     }
-    throw new Error('连不上 huashu-chrome 桥。跑 `huashu-chrome doctor` 看看哪儿卡住了');
+    throw new Error('连不上 ichrome 桥。跑 `ichrome doctor` 看看哪儿卡住了');
   }
 
   #open(info) {
@@ -187,6 +187,7 @@ export function tryStartBridge() {
     const out = fs.openSync(LOG_FILE, 'a');
     const child = spawn(process.execPath, [CLI, 'bridge'], {
       detached: true,
+      windowsHide: true,
       stdio: ['ignore', out, out],
     });
     child.unref();
