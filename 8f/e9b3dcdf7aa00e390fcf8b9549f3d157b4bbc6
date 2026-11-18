@@ -1,0 +1,83 @@
+src/guide.html
+  s_d7ddd795579c77::t_785028c840eecf 1,4-5,7-10,12-19
+extension/offscreen.html
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 3
+src/mcp-server.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 480,544,558,779,789
+extension/background.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 135-136,145,751,2197,2643
+  s_d7ddd795579c77::t_01676695c73b75 2286,2301
+src/bridge.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 86,129,133
+extension/manifest.json
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 3,5-6,13,37-38
+README.md
+  s_d7ddd795579c77::t_26225969dad8ea 45,51,54-56
+extension/panel.html
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 5,81
+  s_d7ddd795579c77::t_243adda9af8b4e 116
+package.json
+  s_d7ddd795579c77::t_01676695c73b75 24
+  s_d7ddd795579c77::t_26225969dad8ea 48
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 2,4,7,13-15,25-29,49-50
+src/lib/paths.js
+  s_d7ddd795579c77::t_c3df0bcc9da271 61
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 7,14,60,64,66,84
+extension/offscreen.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 22
+test/compat.test.js
+  s_d7ddd795579c77::t_3e016e27aa0516 14-15
+.github/workflows/ci.yml
+  s_d7ddd795579c77::t_26225969dad8ea 1,5-6,9-11,13,20,23
+src/cli.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 2,37-38,126,128-135,144,147,196,206,219,227,239
+  s_d7ddd795579c77::t_3e016e27aa0516 349,357
+README.upstream.md
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 1-575
+extension/cdp.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 76
+src/install.js
+  s_d7ddd795579c77::t_ea8c0575021ec9 216,218-223
+  s_d7ddd795579c77::t_3e016e27aa0516 104,152,173,203,308
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 130,149,210-211,238,248-249,279,303
+src/lib/rpc.js
+  s_d7ddd795579c77::t_3e016e27aa0516 190
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 82
+scripts/create-icons.mjs
+  s_d7ddd795579c77::t_4537f194792181 1-57
+extension/compat.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 36-37
+extension/net-hook.js
+  s_d7ddd795579c77::t_01676695c73b75 6,8-9,15-16
+extension/welcome.html
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 5,52,65,67,76,82-83
+  s_d7ddd795579c77::t_243adda9af8b4e 87
+scripts/pack-extension.mjs
+  s_d7ddd795579c77::t_785028c840eecf 2,8-31
+extension/panel.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 119,170,175-177,184
+test/protocol.test.js
+  s_d7ddd795579c77::t_3e016e27aa0516 60,71
+test/install.test.js
+  s_d7ddd795579c77::t_ea8c0575021ec9 1-22
+src/lib/learnings.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 3,195
+extension/mark.js
+  s_d7ddd795579c77::t_6b1e2ad729cc7e 49,350,578
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.52-trip",
+  "base_commit_sha": "8fe9b3dcdf7aa00e390fcf8b9549f3d157b4bbc6",
+  "prompts": {},
+  "sessions": {
+    "s_d7ddd795579c77": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ee8c-bd9e-7f03-ad50-61579b270b8b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "qmruan <qmruan@trip.com>"
+    }
+  }
+}
